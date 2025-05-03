@@ -209,7 +209,7 @@ export default function TechStudy() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex-shrink-0 flex items-center">
-              <span className="text-blue-600 font-bold text-xl">TechStudy</span>
+              <span className="text-blue-600 font-bold text-xl">Techly</span>
             </div>
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4">
@@ -236,7 +236,7 @@ export default function TechStudy() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="md:w-2/3">
             <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4">
-              TechStudy: Learn ICT the Smart Way
+              Techly: Learn ICT the Smart Way
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-blue-100">
               Built by Diamond Champions to make digital education accessible for all.
@@ -589,7 +589,7 @@ export default function TechStudy() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-white text-lg font-semibold mb-4">TechStudy</h3>
+              <h3 className="text-white text-lg font-semibold mb-4">Techly</h3>
               <p className="text-sm">Making digital education accessible for everyone, everywhere.</p>
               <div className="mt-4">
                 <h4 className="text-white text-sm font-medium mb-2">Subscribe to our newsletter</h4>
