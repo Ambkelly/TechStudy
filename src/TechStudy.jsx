@@ -1,12 +1,41 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   Code, Book, Shield, Trophy, Users, Briefcase, 
-  ChevronRight, CheckCircle, Smartphone, Star 
+  ChevronRight, CheckCircle, Smartphone, Star,
+  Video, Play, Pause, Volume2, VolumeX, Maximize, Minimize
 } from 'lucide-react';
 
 export default function TechStudy() {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [activeVideo, setActiveVideo] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const videoRefs = useRef([]);
+  const videoContainerRef = useRef(null);
+
+  // Sample video data
+  const videos = [
+    {
+      id: 'dQw4w9WgXcQ',
+      title: 'Introduction to Programming',
+      description: 'Learn the basics of programming concepts and logic',
+      duration: '15:22'
+    },
+    {
+      id: 'pQN-pnXPaVg',
+      title: 'Web Development Fundamentals',
+      description: 'HTML, CSS and JavaScript crash course',
+      duration: '25:45'
+    },
+    {
+      id: 'rfscVS0vtbw',
+      title: 'Python for Beginners',
+      description: 'Complete Python tutorial for absolute beginners',
+      duration: '4:30:12'
+    }
+  ];
 
   useEffect(() => {
     // Check if viewport is mobile
@@ -31,6 +60,53 @@ export default function TechStudy() {
       clearInterval(interval);
     };
   }, []);
+
+  const togglePlayPause = () => {
+    const iframe = document.querySelector(`iframe[data-video-id="${activeVideo}"]`);
+    if (iframe) {
+      const player = iframe.contentWindow.postMessage;
+      if (isPlaying) {
+        player('{"event":"command","func":"pauseVideo","args":""}', '*');
+      } else {
+        player('{"event":"command","func":"playVideo","args":""}', '*');
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const toggleMute = () => {
+    const iframe = document.querySelector(`iframe[data-video-id="${activeVideo}"]`);
+    if (iframe) {
+      const player = iframe.contentWindow.postMessage;
+      if (isMuted) {
+        player('{"event":"command","func":"unMute","args":""}', '*');
+      } else {
+        player('{"event":"command","func":"mute","args":""}', '*');
+      }
+      setIsMuted(!isMuted);
+    }
+  };
+
+  const toggleFullscreen = () => {
+    if (!isFullscreen) {
+      if (videoContainerRef.current.requestFullscreen) {
+        videoContainerRef.current.requestFullscreen();
+      } else if (videoContainerRef.current.webkitRequestFullscreen) {
+        videoContainerRef.current.webkitRequestFullscreen();
+      } else if (videoContainerRef.current.msRequestFullscreen) {
+        videoContainerRef.current.msRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    }
+    setIsFullscreen(!isFullscreen);
+  };
 
   // Features data
   const features = [
@@ -139,7 +215,8 @@ export default function TechStudy() {
               <div className="ml-10 flex items-baseline space-x-4">
                 <a href="#features" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600">Features</a>
                 <a href="#how-it-works" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600">How It Works</a>
-                <a href="#personalized" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600">Personalized Learning</a>
+                <a href="#video-courses" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600">Video Courses</a>
+                <a href="#personalized" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600">Personalized</a>
                 <a href="#mobile" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600">Mobile</a>
               </div>
             </div>
@@ -212,8 +289,109 @@ export default function TechStudy() {
         </div>
       </section>
 
+      {/* Video Courses Section */}
+      <section id="video-courses" className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Interactive Video Courses</h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Learn from industry experts with our high-quality video tutorials and courses.
+            </p>
+          </div>
+
+          {activeVideo ? (
+            <div 
+              ref={videoContainerRef}
+              className="relative bg-black rounded-xl overflow-hidden shadow-xl mb-8"
+              style={{ aspectRatio: '16/9' }}
+            >
+              <iframe
+                className="w-full h-full"
+                src={`https://www.youtube.com/embed/${activeVideo}?enablejsapi=1`}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                data-video-id={activeVideo}
+              ></iframe>
+              
+              {/* Video Controls */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <button 
+                      onClick={togglePlayPause}
+                      className="text-white hover:text-blue-400 transition"
+                    >
+                      {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
+                    </button>
+                    <button 
+                      onClick={toggleMute}
+                      className="text-white hover:text-blue-400 transition"
+                    >
+                      {isMuted ? <VolumeX className="h-6 w-6" /> : <Volume2 className="h-6 w-6" />}
+                    </button>
+                  </div>
+                  <button 
+                    onClick={toggleFullscreen}
+                    className="text-white hover:text-blue-400 transition"
+                  >
+                    {isFullscreen ? <Minimize className="h-6 w-6" /> : <Maximize className="h-6 w-6" />}
+                  </button>
+                </div>
+              </div>
+              
+              <button 
+                onClick={() => setActiveVideo(null)}
+                className="absolute top-4 right-4 bg-black/50 text-white rounded-full p-2 hover:bg-black/70 transition"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {videos.map((video, index) => (
+                <div 
+                  key={video.id}
+                  className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition duration-300 cursor-pointer"
+                  onClick={() => setActiveVideo(video.id)}
+                >
+                  <div className="relative" style={{ aspectRatio: '16/9' }}>
+                    <img 
+                      src={`https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`} 
+                      alt={video.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                      <div className="bg-white/80 rounded-full p-4">
+                        <Play className="h-8 w-8 text-blue-600" />
+                      </div>
+                    </div>
+                    <div className="absolute bottom-2 right-2 bg-black/70 text-white text-sm px-2 py-1 rounded">
+                      {video.duration}
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-lg mb-1">{video.title}</h3>
+                    <p className="text-gray-600 text-sm">{video.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="text-center mt-8">
+            <button className="bg-blue-600 text-white font-medium py-2 px-6 rounded-lg hover:bg-blue-700 transition duration-300 flex items-center mx-auto">
+              <Video className="h-5 w-5 mr-2" />
+              Browse All Video Courses
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works */}
-      <section id="how-it-works" className="py-16 bg-gray-50">
+      <section id="how-it-works" className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
@@ -243,7 +421,7 @@ export default function TechStudy() {
       </section>
 
       {/* Personalized Learning Section */}
-      <section id="personalized" className="py-16 bg-white">
+      <section id="personalized" className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Personalized Learning Experience</h2>
@@ -267,7 +445,7 @@ export default function TechStudy() {
       </section>
 
       {/* Mobile Accessibility Section */}
-      <section id="mobile" className="py-16 bg-gray-50">
+      <section id="mobile" className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col-reverse md:flex-row items-center gap-8">
             <div className="md:w-1/2">
@@ -323,13 +501,27 @@ export default function TechStudy() {
                   <p>Receive notifications for new content and achievements</p>
                 </div>
               </div>
+              <div className="mt-8 flex flex-wrap gap-4">
+                <button className="bg-gray-800 text-white px-4 py-2 rounded-lg flex items-center">
+                  <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                  </svg>
+                  App Store
+                </button>
+                <button className="bg-gray-800 text-white px-4 py-2 rounded-lg flex items-center">
+                  <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 20.5v-17c0-.59.34-1.11.84-1.35L13.69 12l-9.85 9.85c-.5-.25-.84-.76-.84-1.35m13.81-5.38L6.05 21.34l8.49-8.49 2.27 2.27m3.35-4.31c.34.27.59.69.59 1.19s-.22.9-.57 1.18l-2.29 1.32-2.5-2.5 2.5-2.5 2.27 1.31M6.05 2.66l10.76 6.22-2.27 2.27-8.49-8.49z"/>
+                  </svg>
+                  Google Play
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Student Success Stories</h2>
@@ -338,7 +530,7 @@ export default function TechStudy() {
             </p>
           </div>
           
-          <div className="relative bg-gray-50 rounded-xl shadow-md p-8 max-w-3xl mx-auto">
+          <div className="relative bg-white rounded-xl shadow-md p-8 max-w-3xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-center gap-6">
               <div className="md:w-1/4 flex justify-center">
                 <div className="bg-gradient-to-br from-blue-500 to-purple-600 w-20 h-20 rounded-full flex items-center justify-center">
@@ -381,9 +573,14 @@ export default function TechStudy() {
           <p className="text-lg text-blue-100 mb-8 max-w-3xl mx-auto">
             Join thousands of students who are building their digital skills with TechStudy.
           </p>
-          <button className="bg-white text-blue-600 font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-blue-50 transition duration-300 text-lg">
-            Get Started For Free
-          </button>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <button className="bg-white text-blue-600 font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-blue-50 transition duration-300 text-lg">
+              Get Started For Free
+            </button>
+            <button className="bg-transparent border-2 border-white text-white font-bold py-3 px-8 rounded-lg hover:bg-white hover:text-blue-600 transition duration-300 text-lg">
+              Schedule a Demo
+            </button>
+          </div>
         </div>
       </section>
 
@@ -394,6 +591,19 @@ export default function TechStudy() {
             <div>
               <h3 className="text-white text-lg font-semibold mb-4">TechStudy</h3>
               <p className="text-sm">Making digital education accessible for everyone, everywhere.</p>
+              <div className="mt-4">
+                <h4 className="text-white text-sm font-medium mb-2">Subscribe to our newsletter</h4>
+                <div className="flex">
+                  <input 
+                    type="email" 
+                    placeholder="Your email" 
+                    className="bg-gray-800 text-white px-3 py-2 rounded-l-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                  />
+                  <button className="bg-blue-600 text-white px-4 py-2 rounded-r-lg text-sm hover:bg-blue-700 transition">
+                    Subscribe
+                  </button>
+                </div>
+              </div>
             </div>
             <div>
               <h4 className="text-white text-md font-medium mb-4">Resources</h4>
@@ -402,6 +612,7 @@ export default function TechStudy() {
                 <li><a href="#" className="hover:text-white">Learning Paths</a></li>
                 <li><a href="#" className="hover:text-white">Certification</a></li>
                 <li><a href="#" className="hover:text-white">Career Guide</a></li>
+                <li><a href="#" className="hover:text-white">Video Library</a></li>
               </ul>
             </div>
             <div>
@@ -411,14 +622,16 @@ export default function TechStudy() {
                 <li><a href="#" className="hover:text-white">Contact</a></li>
                 <li><a href="#" className="hover:text-white">Careers</a></li>
                 <li><a href="#" className="hover:text-white">Blog</a></li>
+                <li><a href="#" className="hover:text-white">For Teams</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-white text-md font-medium mb-4">Legal</h4>
+              <h4 className="text-white text-md font-medium mb-4">Support</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white">Cookie Policy</a></li>
+                <li><a href="#" className="hover:text-white">Help Center</a></li>
+                <li><a href="#" className="hover:text-white">FAQ</a></li>
+                <li><a href="#" className="hover:text-white">Community</a></li>
+                <li><a href="#" className="hover:text-white">Feedback</a></li>
               </ul>
             </div>
           </div>
@@ -440,6 +653,11 @@ export default function TechStudy() {
               <a href="#" className="text-gray-400 hover:text-white">
                 <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+              </a>
+              <a href="#" className="text-gray-400 hover:text-white">
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
                 </svg>
               </a>
             </div>
